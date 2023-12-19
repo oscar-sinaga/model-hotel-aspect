@@ -1,17 +1,17 @@
 # Description Model
-Machine Learning untuk deteksi sentimen aspek pada review hotel
+Model klasifikasi untuk prediksi sentimen aspek pada review hotel
 Aspek yang ditentukan adalah sbb:
-1. Surrounding (surrounding_sentiment atau aspect-surrounding)
-2. Service (service_sentiment atau aspect-service)
-3. Meal (Meal_sentiment atau aspect-meal)
-4. Location (location_sentiment atau aspect-location)
-5. Staff (staff_sentiment atau aspect-staff)
-6. Room (room_sentiment atau aspect-room)
-7. Facility (facility_sentiment atau aspect-facility)
-8. Quality (quality_sentiment atau aspect-quality)
-9. Value (value_sentiment atau aspect-value)
+1. Surrounding 
+2. Service 
+3. Meal 
+4. Location
+5. Staff 
+6. Room 
+7. Facility 
+8. Quality 
+9. Value 
 
-Sebelum ditrain dengan model machine learning, data teks (_Features_) nya perlu di cleaning terlebih dahulu seperti 
+Sebelum ditrain maupun dilakukan inference/prediksi, data teks (_Features_) nya perlu di cleaning terlebih dahulu seperti 
 - Menon-kapitalkan semua teks
 - Mengganti baris baru dengan spasi
 - Menghapus tanda kutip (') 
@@ -26,28 +26,10 @@ Setelah semua teks berhasil dicleaning, kemudian teksnya perlu divektorisasi yai
 
         vectorizer = TfidfVectorizer()
 
-Model machine learning ini terbagi menjadi 2 yaitu model untuk sentimen bahasa indonesia dan model untuk sentimen bahasa inggris.
-
-# Developement
-
-Seperti yang kita lihat di atas, ada beberapa metrik evaluasi yang sangat rendah seperti F1-Score dan recall yang sangat kecil pada class negatif. Oleh karena itu disini ada beberapa development model pada folder `dev`. 
-
-## Ruled Based
-Pada developedment ini kita akan melakukan developement terutama pada saat model melakukan inferencing atau prediction. Disini kita akan menambahkan metode rule-based selain menggunakan machine learning untuk melakukan inferencing atau prediction sentiment dari suatu teks.
-
-Konsepnya rule basednya adalah kita terlebih dahulu mempunyai dataframe keyword positif dan negatif pada setiap aspek. Kemudian dari sebuah teks, model akan mencari apakah di dalam teks tersebut ada keyword positif atau negatif di setiap aspeknya. Kemudian dari jumlah keyword positif dan negatif akan dihitung scorenya. Scorenya akan dihitung dengan cara jumlah kemunculan Keyword positif akan dikurangin dengan jumlah kemunculan keyword negatif pada setiap aspek. jika score 0, maka modelnya akan menggunakan machine learning yang sudah dilatih untuk melakukan prediksi. Jika scorenya lebih dari 0 maka teks akan diprediksi positif, jika kurang dari 0, maka teks akan diprediksi positif.
-
-Prediksi dengan menggunakan rule based ini merupakan hal optional, bisa tidak menggunakan keyword dalam melakukan prediksi.
-
-### Algoritmanya
-1. Pertama perlu membaca dataframe keyword per aspect terlebih dahulu
-2. Kemudian, teks nya perlu dihitung scorenya setiap aspek berdasarkan  kemunculan keyword positif dan negatif setiap aspeknya pada teks. yaitu $$ScoreAspect = JumlahKeywordPositif-JumlahKeywordNegatif$$   
-3. Setelah itu, dilooping per aspek-nya, jika $ScoreAspect>0$ maka sentimen akan diberikan positif jika  $ScoreAspect<0$ maka sentimen teks langsung dibuat negatif pada aspek tersebut.
-4. Jika $ScoreAspect=0$, maka prediksi sentimen pada teks akan dilakukan oleh machine learning yang sudah dilatih.
+Model ini akan dilatih dengan *machine learning*, kemudian model yang sudah dilatih tersebut akan digunakan untuk memprediksi sentiment. Ada sedikit modifikasi perilaku model saat prediksi yaitu model ini tidak murni memprediksi sentimen dengan hanya menggunakan hasil pelatihan *machine learning*, namun ada penggunaan rule based yaitu menggunakan keyword per aspek terlebih sebelum menggunakan model *machine learning*
 
 ## Machine Learning
 
-Selain itu disini ada modifikasi sedikit di modelnya. yaitu:
 1. Menggabungkan (ensembel) 4 model yaitu `LinearSVC`, `RandomForestClassifier`, `LogisticRegression`, `GradientBoostingClassifier` berdasarkan voting terbanyak (`hard`).
 2. Menggunakan *cost-sensitive learning* yaitu `class_weight = 'balanced'`  untuk mengatasi data yang sangat tidak balanced apalagi pada class negatif yang sangat sedikit. konsepnya adalah bobot pelatihan pada label atau *class* yang datanya ;lebih besar sedikit akan diperbesar menyesuaikan data *class* yang lebih banyak.
 
@@ -61,6 +43,27 @@ gb = GradientBoostingClassifier(random_state=42)
 # Combine all models using Voting Classifier
 ensemble = VotingClassifier(estimators=[('lr', lr), ('svm', svm), ('rf', rf), ('gb', gb)], voting='hard', n_jobs=-1)
 ```
+
+## Ruled Based
+Pada developedment ini kita akan melakukan developement terutama pada saat model melakukan inferencing atau prediction. Disini kita akan menambahkan metode rule-based selain menggunakan machine learning untuk melakukan inferencing atau prediction sentiment dari suatu teks.
+
+Konsepnya rule basednya adalah kita terlebih dahulu mempunyai dataframe keyword positif dan negatif pada setiap aspek. Kemudian dari sebuah teks, model akan mencari apakah di dalam teks tersebut ada keyword positif atau negatif di setiap aspeknya. Kemudian dari jumlah keyword positif dan negatif akan dihitung scorenya. Scorenya akan dihitung dengan cara jumlah kemunculan Keyword positif akan dikurangin dengan jumlah kemunculan keyword negatif pada setiap aspek. 
+
+Example:
+        
+        - Input: score_text_on_aspect("Great location and friendly staff", aspect_keywords)
+        - Output: {'location': 1, 'staff': 1}
+
+Jika score 0, maka modelnya akan menggunakan machine learning yang sudah dilatih untuk melakukan prediksi. Jika scorenya lebih dari 0 maka teks akan diprediksi positif, jika kurang dari 0, maka teks akan diprediksi positif.
+
+Prediksi dengan menggunakan rule based ini merupakan hal optional, bisa tidak menggunakan keyword dalam melakukan prediksi.
+
+### Algoritmanya
+1. Pertama perlu membaca dataframe keyword per aspect terlebih dahulu
+2. Kemudian, teks nya perlu dihitung scorenya setiap aspek berdasarkan  kemunculan keyword positif dan negatif setiap aspeknya pada teks. yaitu $$ScoreAspect = JumlahKeywordPositif-JumlahKeywordNegatif$$   
+3. Setelah itu, dilooping per aspek-nya, jika $ScoreAspect>0$ maka sentimen akan diberikan positif jika  $ScoreAspect<0$ maka sentimen teks langsung dibuat negatif pada aspek tersebut.
+4. Jika $ScoreAspect=0$, maka prediksi sentimen pada teks akan dilakukan oleh machine learning yang sudah dilatih.
+
 
 # Evaluation
 ## **Model Bahasa Inggris**
