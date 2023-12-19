@@ -265,3 +265,29 @@ ensemble = VotingClassifier(estimators=[('lr', lr), ('svm', svm), ('rf', rf), ('
 
 - confusion_matrix
    ![confusion_matrix_value](image/confusion_matrix/english/value.png)
+
+# How to Run
+## Install venv:
+
+```bash 
+sudo pip3 install virtualenv
+```
+##
+
+## create venv with python=3.11:
+
+```bash
+virtualenv -p /usr/bin/python3.11 venv
+```
+##
+## active your virtual environment:
+
+```bash
+source venv/bin/activate
+```
+##
+## install dependencies:
+
+```bash
+pip install -r requirements.txt
+```

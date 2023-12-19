@@ -85,8 +85,8 @@ class HotelAspect:
         # Iterate through each aspect and load the corresponding model and vectorizer
         for aspect in self.aspects:
             # Construct file paths for vectorizer and classifier
-            vect = f"tfidf-{aspect}"
-            clf = f"clf-{aspect}"
+            vect = f"tfidf-{aspect}.joblib"
+            clf = f"clf-{aspect}.joblib"
 
             # Load the TF-IDF vectorizer
             model_tfidf = joblib.load(os.path.join(dirpath,save_path, vect))
@@ -189,8 +189,8 @@ class HotelAspect:
         """
 
         print(f'Saving model {aspect}')
-        joblib.dump(vectorizer, os.path.join(self.dirpath, f'{save_path}', "tfidf-%s" % aspect))
-        joblib.dump(model, os.path.join(self.dirpath, f'{save_path}', "clf-%s" % aspect))
+        joblib.dump(vectorizer, os.path.join(self.dirpath, f'{save_path}', "tfidf-%s.joblib" % aspect))
+        joblib.dump(model, os.path.join(self.dirpath, f'{save_path}', "clf-%s.joblib" % aspect))
 
 
     def save_model(self,save_path = "models_english"):
